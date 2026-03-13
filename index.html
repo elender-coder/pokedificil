@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pokemon HARDCORE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a12; --panel: #1a1a2e; --accent: #e94560; --text: #ffffff;
+            --hp-green: #4cd137; --hp-yellow: #f1c40f; --hp-red: #e74c3c; --xp-blue: #00a8ff;
+            --type-fire: #ff9c54; --type-water: #4d90d5; --type-grass: #63bb5b;
+        }
+
+        body {
+            background: var(--bg-dark); color: var(--text); font-family: 'Press Start 2P', cursive;
+            margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh;
+            overflow: hidden; image-rendering: pixelated;
+        }
+
+        #game-container {
+            width: 1100px; height: 800px; background: var(--panel); border: 6px solid #16213e;
+            position: relative; display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        /* --- UI DE BIOMAS --- */
+        #bioma-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0; opacity: 0.2; pointer-events: none; transition: background 3s ease;
+        }
+
+        /* --- PANTALLAS --- */
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; z-index: 10; }
+        #start-screen { display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #1a1a2e 0%, #0a0a12 100%); }
+        #main-game { padding: 25px; box-sizing: border-box; }
+
+        /* --- ZONA DE BATALLA --- */
+        .battle-view { display: flex; justify-content: space-around; height: 400px; margin-top: 40px; perspective: 1000px; }
+        .pk-box { width: 400px; display: flex; flex-direction: column; align-items: center; position: relative; }
+
+        .sprite-wrapper { position: relative; height: 250px; display: flex; align-items: center; justify-content: center; }
+        .sprite-img { width: 220px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.6)); transition: transform 0.2s; }
+        .enemy-sprite { transform: scaleX(-1); }
+
+        .status-panel {
+            background: rgba(15, 52, 96, 0.9); padding: 15px; border-radius: 8px;
+            width: 100%; border: 3px solid #533483; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .bar-outer { width: 100%; height: 14px; background: #222; margin: 10px 0; border: 2px solid #000; border-radius: 5px; overflow: hidden; }
+        .bar-inner { height: 100%; width: 100%; transition: width 0.8s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+
+        /* --- CONTROLES --- */
+        .hud-bottom { display: grid; grid-template-columns: 1fr 380px; gap: 20px; height: 250px; margin-top: auto; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .log-box {
+            background: #000; border: 3px solid #533483; padding: 15px; font-size: 10px;
+            line-height: 1.8; overflow-y: auto; color: #ff3333; text-shadow: 0 0 5px #ff333344;
+        }
+
+        button {
+            background: #16213e; color: #fff; border: 3px solid #533483;
+            font-family: 'Press Start 2P'; font-size: 10px; cursor: pointer; transition: 0.1s;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+        }
+        button:hover:not(:disabled) { background: var(--accent); transform: translateY(-3px); }
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- MODALES Y RECOMPENSAS --- */
+        #reward-modal, #team-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 100; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        .reward-item {
+            background: #1a1a2e; border: 4px solid var(--accent); margin: 10px;
+            padding: 20px; width: 300px; cursor: pointer; text-align: center;
+        }
+
+        /* --- ANIMACIONES --- */
+        .atk-player { animation: p-atk 0.4s ease; }
+        @keyframes p-atk { 0% { transform: translateX(0); } 50% { transform: translateX(50px); } 100% { transform: translateX(0); } }
+        .atk-enemy { animation: e-atk 0.4s ease; }
+        @keyframes e-atk { 0% { transform: translateX(0); } 50% { transform: translateX(-50px); } 100% { transform: translateX(0); } }
+        .take-damage { animation: damage-flash 0.1s 4; }
+        @keyframes damage-flash { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        .shiny-fx { animation: shiny-glimmer 2s infinite; }
+        @keyframes shiny-glimmer { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.5) saturate(1.5); } }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="bioma-layer"></div>
+
+    <div id="start-screen" class="screen">
+        <div style="text-align: center;">
+            <h1 style="font-size: 60px; color: var(--accent); margin-bottom: 10px;">POKE<br>DIAGO</h1>
+            <p style="color: #ff0000; margin-bottom: 40px;">MODO HARDCORE V2.1</p>
+            <button onclick="Game.start()" style="padding: 25px 60px; font-size: 20px;">INICIAR DESAFÍO</button>
+        </div>
+    </div>
+
+    <div id="main-game" class="screen">
+        <div style="display: flex; justify-content: space-between; border-bottom: 4px solid #533483; padding-bottom: 15px;">
+            <div id="ui-floor-info">PISO: 1 | BIOMA: PRADERA</div>
+            <div id="ui-currency" style="color: #f1c40f;">$ 100</div>
+        </div>
+
+        <div class="battle-view">
+            <div class="pk-box" id="p-box">
+                <div class="status-panel">
+                    <div id="p-name" style="font-size: 12px;">---</div>
+                    <div class="bar-outer"><div id="p-hp-bar" class="bar-inner" style="background: var(--hp-green);"></div></div>
+                    <div class="bar-outer" style="height: 6px;"><div id="p-xp-bar" class="bar-inner" style="background: var(--xp-blue); width: 0%;"></div></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 9px; margin-top: 5px;">
+                        <span id="p-hp-num">0/0 HP</span>
+                        <span id="p-lvl">Lv. 0</span>
+                    </div>
+                </div>
+                <div class="sprite-wrapper">
+                    <img id="p-sprite" class="sprite-img" src="">
+                </div>
+            </div>
+
+            <div class="pk-box" id="e-box">
+                <div class="status-panel">
+                    <div id="e-name" style="font-size: 12px;">---</div>
+                    <div class="bar-outer"><div id="e-hp-bar" class="bar-inner" style="background: var(--hp-green);"></div></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 9px; margin-top: 5px;">
+                        <span id="e-hp-num">0/0 HP</span>
+                        <span id="e-lvl">Lv. 0</span>
+                    </div>
+                </div>
+                <div class="sprite-wrapper">
+                    <img id="e-sprite" class="sprite-img enemy-sprite" src="">
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-bottom">
+            <div id="menu-area" class="menu-grid">
+                </div>
+            <div id="log-box" class="log-box">PREPÁRATE PARA SUFRIR...</div>
+        </div>
+    </div>
+
+    <div id="reward-modal">
+        <h2 style="color: var(--accent);">RECOMPENSA (ELIGE SABIAMENTE)</h2>
+        <div id="reward-list"></div>
+    </div>
+
+    <div id="team-modal">
+        <h2 style="color: #00ffcc;">GESTIÓN DE EQUIPO</h2>
+        <div id="team-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"></div>
+        <button id="close-team-btn" onclick="Game.closeModals()" style="margin-top: 20px; padding: 10px 40px;">VOLVER</button>
+    </div>
+</div>
+
+<script>
+/**
+ * POKEROGUE HARDCORE - MODIFICADO PARA MÁXIMA DIFICULTAD
+ * @version 2.1.HARD
+ */
+
+const Game = {
+    floor: 1, money: 100, team: [], activeIdx: 0, enemy: null,
+    isBusy: false, currentMode: 'MAIN', 
+
+    // Economía nerfeada: Menos recursos iniciales
+    inv: { pokebola: 3, superbola: 0, ultrabola: 0, masterbola: 0, pocion: 1 },
+
+    // Tabla de tipos (Sin cambios para mantener compatibilidad)
+    types: {
+        fire: { grass: 2, water: 0.5, fire: 0.5, bug: 2, steel: 2, ice: 2 },
+        water: { fire: 2, grass: 0.5, ground: 2, rock: 2, water: 0.5 },
+        grass: { water: 2, fire: 0.5, ground: 2, poison: 0.5, flying: 0.5, rock: 2 },
+        electric: { water: 2, flying: 2, grass: 0.5, electric: 0.5, ground: 0 },
+        ice: { grass: 2, ground: 2, flying: 2, dragon: 2, fire: 0.5, water: 0.5 },
+        flying: { grass: 2, bug: 2, fighting: 2, electric: 0.5, rock: 0.5, steel: 0.5 }
+    },
+
+    async start() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('main-game').style.display = 'flex';
+        // Empiezas con un Charmander nivel 5 (Más difícil al inicio que Bulbasaur)
+        const starter = await this.fetchPk('charmander', 5);
+        this.team.push(starter);
+        this.newEncounter();
+    },
+
+    async fetchPk(id, lvl) {
+        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+        const d = await res.json();
+        const moveData = [];
+        const learnable = d.moves.filter(m => m.version_group_details[0].level_learned_at <= lvl).slice(-4);
+
+        for(let m of learnable) {
+            const md = await (await fetch(m.move.url)).json();
+            moveData.push({
+                n: md.names.find(n => n.language.name === 'es')?.name || m.move.name,
+                p: md.power || 40,
+                t: md.type.name,
+                acc: md.accuracy || 100
+            });
+        }
+
+        const isShiny = Math.random() < 0.02; // Shiny más raro (2%)
+        return {
+            id: d.id, name: d.name.toUpperCase(), lvl: lvl, xp: 0,
+            // HP base reducido para el jugador, aumentado para enemigos en newEncounter
+            hp: d.stats[0].base_stat * 2 + 30, maxHp: d.stats[0].base_stat * 2 + 30,
+            atk: d.stats[1].base_stat, def: d.stats[2].base_stat,
+            sprite: isShiny ? d.sprites.front_shiny : d.sprites.front_default,
+            shiny: isShiny, types: d.types.map(t => t.type.name),
+            moves: moveData, speciesUrl: d.species.url
+        };
+    },
+
+    async newEncounter() {
+        this.isBusy = true;
+        this.updateBioma();
+
+        // Escalado de nivel agresivo: Enemigos siempre 2 niveles por encima
+        let enemyLvl = this.floor + 6;
+        let id = this.floor < 30 ? Math.floor(Math.random() * 151) + 1 : Math.floor(Math.random() * 600) + 1;
+        
+        // Jefes cada 10 pisos
+        if(this.floor % 10 === 0) {
+            id = [144, 145, 146, 150, 151, 249, 250, 382, 383, 384].sort(()=>.5-Math.random())[0];
+            enemyLvl += 5;
+            this.log("¡ADVERTENCIA: POKÉMON JEFE DETECTADO!");
+        }
+
+        this.enemy = await this.fetchPk(id, enemyLvl);
+        // Buff de stats al enemigo (Dificultad Artificial)
+        this.enemy.maxHp = Math.floor(this.enemy.maxHp * 1.3);
+        this.enemy.hp = this.enemy.maxHp;
+        this.enemy.atk = Math.floor(this.enemy.atk * 1.2);
+
+        this.log(`Piso ${this.floor}. ${this.enemy.name} (Lv.${this.enemy.lvl}) bloquea el camino.`);
+        this.isBusy = false;
+        this.renderMenu();
+        this.updateUI();
+    },
+
+    updateUI() {
+        const p = this.team[this.activeIdx];
+        const e = this.enemy;
+        document.getElementById('ui-floor-info').innerText = `PISO: ${this.floor} | BIOMA: ${this.currentBioma}`;
+        document.getElementById('ui-currency').innerText = `$ ${this.money}`;
+        document.getElementById('p-name').innerText = p.name + (p.shiny ? " ✨" : "");
+        document.getElementById('p-lvl').innerText = `Lv. ${p.lvl}`;
+        document.getElementById('p-hp-num').innerText = `${Math.ceil(p.hp)}/${p.maxHp} HP`;
+        this.setBar('p-hp-bar', p.hp, p.maxHp);
+        document.getElementById('p-xp-bar').style.width = p.xp + '%';
+        document.getElementById('p-sprite').src = p.sprite;
+        p.shiny ? document.getElementById('p-sprite').classList.add('shiny-fx') : document.getElementById('p-sprite').classList.remove('shiny-fx');
+        if(e) {
+            document.getElementById('e-name').innerText = e.name + (e.shiny ? " ✨" : "");
+            document.getElementById('e-lvl').innerText = `Lv. ${e.lvl}`;
+            document.getElementById('e-hp-num').innerText = `${Math.ceil(e.hp)}/${e.maxHp} HP`;
+            this.setBar('e-hp-bar', e.hp, e.maxHp);
+            document.getElementById('e-sprite').src = e.sprite;
+        }
+    },
+
+    setBar(id, cur, max) {
+        const pct = Math.max(0, (cur/max) * 100);
+        const el = document.getElementById(id);
+        el.style.width = pct + '%';
+        el.style.background = pct > 60 ? 'var(--hp-green)' : pct > 30 ? 'var(--hp-yellow)' : 'var(--hp-red)';
+    },
+
+    renderMenu() {
+        const area = document.getElementById('menu-area');
+        area.innerHTML = "";
+        if(this.currentMode === 'MAIN') {
+            this.createBtn("LUCHAR", () => { this.currentMode = 'MOVES'; this.renderMenu(); });
+            this.createBtn("BOLSA", () => { this.currentMode = 'ITEMS'; this.renderMenu(); });
+            this.createBtn("EQUIPO", () => this.openTeam());
+            this.createBtn("HUIR (50%)", () => this.huir());
+        } else if(this.currentMode === 'MOVES') {
+            this.team[this.activeIdx].moves.forEach((m, i) => {
+                this.createBtn(`${m.n.toUpperCase()}<br><span style="font-size:7px">${m.t}</span>`, () => this.playerAttack(i));
+            });
+            this.createBtn("ATRÁS", () => { this.currentMode = 'MAIN'; this.renderMenu(); });
+        } else if(this.currentMode === 'ITEMS') {
+            Object.keys(this.inv).forEach(k => {
+                if(this.inv[k] > 0) this.createBtn(`${k.toUpperCase()} (${this.inv[k]})`, () => this.useItem(k));
+            });
+            this.createBtn("ATRÁS", () => { this.currentMode = 'MAIN'; this.renderMenu(); });
+        }
+    },
+
+    createBtn(txt, fn) {
+        const btn = document.createElement('button');
+        btn.innerHTML = txt;
+        btn.disabled = this.isBusy;
+        btn.onclick = fn;
+        document.getElementById('menu-area').appendChild(btn);
+    },
+
+    async playerAttack(idx) {
+        this.isBusy = true;
+        const p = this.team[this.activeIdx];
+        const m = p.moves[idx];
+        document.getElementById('p-box').classList.add('atk-player');
+        await this.processDamage(p, this.enemy, m, 'e-box');
+        if(this.enemy.hp <= 0) {
+            this.enemy.hp = 0; this.updateUI(); await this.win();
+        } else {
+            setTimeout(() => this.enemyTurn(), 600);
+        }
+    },
+
+    async enemyTurn() {
+        // IA Mejorada: El enemigo tiene 70% de probabilidad de usar su ataque más fuerte
+        let m = this.enemy.moves.sort((a,b) => b.p - a.p)[0];
+        if(Math.random() > 0.7) m = this.enemy.moves[Math.floor(Math.random() * this.enemy.moves.length)];
+
+        document.getElementById('e-box').classList.add('atk-enemy');
+        await this.processDamage(this.enemy, this.team[this.activeIdx], m, 'p-box');
+
+        if(this.team[this.activeIdx].hp <= 0) {
+            this.team[this.activeIdx].hp = 0;
+            this.log(`¡${this.team[this.activeIdx].name} ha caído!`);
+            if(this.team.every(pk => pk.hp <= 0)) {
+                this.log("DERROTA TOTAL. REINICIANDO...");
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                this.openTeam();
+                return;
+            }
+        }
+        this.isBusy = false;
+        this.currentMode = 'MAIN';
+        this.renderMenu();
+        this.updateUI();
+    },
+
+    async processDamage(atk, def, move, targetId) {
+        this.log(`${atk.name} lanzó ${move.n.toUpperCase()}`);
+        await new Promise(r => setTimeout(r, 400));
+        document.getElementById(targetId).classList.add('take-damage');
+        
+        let mult = 1;
+        def.types.forEach(t => { if(this.types[move.t]?.[t]) mult *= this.types[move.t][t]; });
+        
+        // Fórmula de daño ajustada: Enemigos hacen 15% más de daño base
+        let baseDamage = (( (2*atk.lvl/5+2) * move.p * atk.atk/def.def ) / 50 + 2);
+        if(atk === this.enemy) baseDamage *= 1.15;
+
+        let damage = Math.floor(baseDamage * mult);
+        def.hp -= damage;
+
+        if(mult > 1) this.log("¡Es súper efectivo!");
+        if(mult < 1 && mult > 0) this.log("No es muy eficaz...");
+        if(Math.random() < 0.1) { this.log("¡GOLPE CRÍTICO!"); def.hp -= damage; }
+
+        this.updateUI();
+        await new Promise(r => setTimeout(r, 400));
+        document.querySelectorAll('.pk-box').forEach(b => b.classList.remove('atk-player', 'atk-enemy', 'take-damage'));
+    },
+
+    async useItem(item) {
+        this.isBusy = true;
+        this.inv[item]--;
+        this.log(`Usaste ${item.toUpperCase()}...`);
+
+        if(item.includes('bola')) {
+            // Ratio de captura reducido
+            const rates = { pokebola: 0.15, superbola: 0.3, ultrabola: 0.5, masterbola: 1.0 };
+            const chance = rates[item] + (1 - this.enemy.hp/this.enemy.maxHp) * 0.5;
+
+            if(Math.random() < chance || item === 'masterbola') {
+                this.log(`¡Capturado! ${this.enemy.name} se une al equipo.`);
+                if(this.team.length < 6) {
+                    this.team.push({...this.enemy, hp: Math.floor(this.enemy.maxHp * 0.5)});
+                } else {
+                    this.log("Equipo lleno. Se liberó al Pokémon.");
+                }
+                this.win();
+            } else {
+                this.log("¡Se liberó! La dificultad aumenta.");
+                setTimeout(() => this.enemyTurn(), 800);
+            }
+        } else if(item === 'pocion') {
+            const p = this.team[this.activeIdx];
+            p.hp = Math.min(p.maxHp, p.hp + 50); // Poción cura menos
+            this.log("Curación ligera aplicada.");
+            setTimeout(() => this.enemyTurn(), 800);
+        }
+        this.updateUI();
+        this.renderMenu();
+    },
+
+    async win() {
+        this.log("¡Sobreviviste al combate!");
+        this.money += 100; // Menos dinero por victoria
+        const p = this.team[this.activeIdx];
+        p.xp += 35; // Menos XP para obligar a rotar o farmear
+
+        if(p.xp >= 100) {
+            p.lvl++; p.xp = 0; p.maxHp += 15; p.hp = p.maxHp;
+            this.log(`${p.name} subió al Lv. ${p.lvl}`);
+            await this.checkEvo(p);
+        }
+        setTimeout(() => this.showRewards(), 1000);
+    },
+
+    async checkEvo(p) {
+        try {
+            const s = await (await fetch(p.speciesUrl)).json();
+            const e = await (await fetch(s.evolution_chain.url)).json();
+            let cur = e.chain;
+            while(cur && cur.species.name !== p.name.toLowerCase()) cur = cur.evolves_to[0];
+            if(cur && cur.evolves_to[0]) {
+                const next = cur.evolves_to[0];
+                const min = next.evolution_details[0]?.min_level || 16;
+                if(p.lvl >= min) {
+                    this.log("Evolucionando...");
+                    const newPk = await this.fetchPk(next.species.name, p.lvl);
+                    Object.assign(p, newPk);
+                    this.log(`¡Ahora es un ${p.name}!`);
+                }
+            }
+        } catch(err) { }
+    },
+
+    showRewards() {
+        const modal = document.getElementById('reward-modal');
+        const list = document.getElementById('reward-list');
+        modal.style.display = 'flex';
+        list.innerHTML = "";
+
+        const opts = [
+            { n: "Pokébola x2", d: "Supervivencia", fn: () => this.inv.pokebola += 2 },
+            { n: "Poción x1", d: "Sustento", fn: () => this.inv.pocion += 1 },
+            { n: "Eter", d: "Cura 20% HP equipo", fn: () => this.team.forEach(pk => pk.hp = Math.min(pk.maxHp, pk.hp + pk.maxHp * 0.2)) }
+        ];
+
+        opts.forEach(o => {
+            const d = document.createElement('div');
+            d.className = 'reward-item';
+            d.innerHTML = `<b>${o.n}</b><br><small>${o.d}</small>`;
+            d.onclick = () => {
+                o.fn();
+                modal.style.display = 'none';
+                this.floor++;
+                this.newEncounter();
+            };
+            list.appendChild(d);
+        });
+    },
+
+    openTeam() {
+        const modal = document.getElementById('team-modal');
+        const list = document.getElementById('team-list');
+        modal.style.display = 'flex';
+        list.innerHTML = "";
+
+        this.team.forEach((pk, i) => {
+            const d = document.createElement('div');
+            d.className = 'reward-item';
+            d.style.width = '200px';
+            d.style.borderColor = i === this.activeIdx ? '#00ffcc' : (pk.hp <= 0 ? '#333' : '#e94560');
+            d.innerHTML = `${pk.name}<br>LV.${pk.lvl}<br>HP: ${Math.ceil(pk.hp)}/${pk.maxHp}`;
+            d.onclick = () => {
+                if(pk.hp > 0 && i !== this.activeIdx) {
+                    this.activeIdx = i;
+                    this.log(`¡Cambiando a ${pk.name}!`);
+                    this.closeModals();
+                    this.updateUI();
+                    this.renderMenu();
+                    if(this.isBusy) this.enemyTurn();
+                } else if(pk.hp <= 0) {
+                    this.log("¡Está debilitado!");
+                }
+            };
+            list.appendChild(d);
+        });
+    },
+
+    closeModals() {
+        document.getElementById('team-modal').style.display = 'none';
+        document.getElementById('reward-modal').style.display = 'none';
+    },
+
+    updateBioma() {
+        const biomas = [
+            { n: 'INFIERNO', c: '#4a0000' }, { n: 'ABISMO', c: '#1a0033' },
+            { n: 'PANTANO', c: '#1b2601' }, { n: 'TUNDRA', c: '#2c3e50' }
+        ];
+        const b = biomas[Math.floor(this.floor/5) % biomas.length];
+        this.currentBioma = b.n;
+        document.getElementById('bioma-layer').style.background = b.c;
+    },
+
+    huir() {
+        if(Math.random() > 0.5) {
+            this.log("Lograste escapar por poco...");
+            setTimeout(() => this.newEncounter(), 1000);
+        } else {
+            this.log("¡No pudiste escapar!");
+            this.isBusy = true;
+            setTimeout(() => this.enemyTurn(), 800);
+        }
+    },
+
+    log(m) {
+        const b = document.getElementById('log-box');
+        b.innerHTML = `> ${m}<br>` + b.innerHTML;
+        if(b.innerHTML.length > 1000) b.innerHTML = b.innerHTML.substring(0, 1000);
+    }
+};
+</script>
+</body>
+</html>
