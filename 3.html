@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plantilla Web Mejorada</title>
+    <title>Impacto de las Redes Sociales en la Educación</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente ligeramente más moderna */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
@@ -22,8 +22,18 @@
         header {
             background-color: #2c3e50;
             color: white;
-            padding: 2rem;
+            padding: 2.5rem 2rem;
             text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
         }
 
         /* Contenedor principal */
@@ -33,20 +43,19 @@
             padding: 0 1rem;
         }
 
-        /* Banner Principal (Hero) - Ahora con la imagen de fondo */
+        /* Banner Principal (Hero) */
         .hero {
             background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDEMmLfPnhCRdOxqcMJb6-0NzY0OK-ObVUu_P1DVyZmg&s=10');
             background-size: cover;
             background-position: center;
             border-radius: 8px;
-            padding: 4rem 2rem; /* Más padding para que se vea la imagen */
+            padding: 4rem 2rem;
             text-align: center;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Sombra para destacar el banner */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             position: relative;
         }
 
-        /* Superposición oscura para que el texto sobre la imagen hero sea legible */
         .hero::before {
             content: '';
             position: absolute;
@@ -54,17 +63,29 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.4); /* Capa negra traslúcida */
+            background-color: rgba(0, 0, 0, 0.6);
             border-radius: 8px;
         }
 
-        /* Asegurar que el contenido del hero esté sobre la superposición */
         .hero-content {
             position: relative;
             z-index: 1;
+            color: white;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        /* Rejilla de Contenido */
+        .hero-content h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-content p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -79,33 +100,51 @@
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s; /* Efecto suave al pasar el ratón */
+            transition: transform 0.2s;
         }
 
         .card:hover {
-            transform: translateY(-5px); /* Se levanta un poco al hacer hover */
+            transform: translateY(-5px);
         }
 
-        /* Espacio para Imágenes MEJORADO (Placeholders en tarjetas) */
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
         .img-placeholder {
             width: 100%;
             height: 200px;
-            background-color: #e2e8f0; /* Fondo gris claro */
-            border: 2px solid #cbd5e1; /* Borde gris */
+            background-color: #e2e8f0;
+            border: 2px solid #cbd5e1;
             border-radius: 6px;
             display: flex;
-            flex-direction: column; /* Icono arriba, texto abajo */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #94a3b8; /* Color de texto suave */
+            color: #94a3b8;
             margin-bottom: 1rem;
             position: relative;
             overflow: hidden;
         }
 
-        /* Simulación de un icono de imagen dentro del placeholder */
         .img-placeholder::before {
-            content: '📷'; /* Icono de cámara simple */
+            content: '📷';
             font-size: 3rem;
             margin-bottom: 0.5rem;
             opacity: 0.5;
@@ -116,26 +155,6 @@
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-        }
-
-
-        /* Bloques vacíos para texto */
-        .text-placeholder {
-            background-color: #f1f5f9;
-            border-radius: 4px;
-            height: 1rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .text-placeholder.title {
-            height: 1.5rem;
-            width: 60%;
-            background-color: #e2e8f0;
-            margin-bottom: 1rem;
-        }
-
-        .text-placeholder.short {
-            width: 40%;
         }
 
         /* Pie de página */
@@ -151,19 +170,17 @@
 <body>
 
     <header>
-        <h1>[ TÍTULO DE LA PÁGINA ]</h1>
-        <p>[ Subtítulo o descripción breve ]</p>
+        <h1>Redes Sociales y Rendimiento Académico</h1>
+        <p>Estrategias  y uso responsable del entorno digital en adolescentes</p>
     </header>
 
     <main class="container">
         
-        <!-- Sección Principal (Hero con imagen de fondo) -->
+        <!-- Sección Principal (Hero) -->
         <section class="hero">
             <div class="hero-content">
-                <!-- He añadido placeholders de texto aquí también para rellenar el banner -->
-                <div class="text-placeholder title" style="background-color: #f1f5f9; margin: 0 auto 1rem auto; width: 50%;"></div>
-                <div class="text-placeholder" style="background-color: #f1f5f9; width: 80%; margin: 0 auto 0.75rem auto;"></div>
-                <div class="text-placeholder short" style="background-color: #f1f5f9; margin: 0 auto; width: 30%;"></div>
+                <h2>Integración Constructiva en la Educación</h2>
+                <p>Estudios previos han presentado tanto los desafíos como las ventajas del uso de las redes sociales. Al entender mejor estos factores, se podrían proponer la manera de generar estrategias  que permitan a los docentes y responsables de políticas educativas maximizar su empleo y mitigar sus efectos adversos, siendo crucial identificar cómo las ventajas pueden ser integradas de manera constructiva en el entorno educativo.</p>
             </div>
         </section>
 
@@ -172,46 +189,38 @@
             
             <!-- Tarjeta 1 -->
             <article class="card">
-                <div class="img-placeholder">
-                    <span class="img-placeholder-text">Insertar Imagen</span>
-                    <span style="font-size: 0.8rem;">(Sugerido: 300x200 px)</span>
-                </div>
-                <div class="text-placeholder title"></div>
-                <div class="text-placeholder"></div>
-                <div class="text-placeholder"></div>
-                <div class="text-placeholder short"></div>
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&auto=format&fit=crop" alt="Tecnología e Informática" class="card-img">
+                <h3>Desafíos Académicos en el Entorno Digital</h3>
+                <p>Se ha encontrado una relación nociva entre el uso de las redes sociales con el desempeño académico de los estudiantes, debido a que a ellos les resulta difícil tener una adecuada concentración y retención de la información fuera del contexto digital.</p>
             </article>
 
             <!-- Tarjeta 2 -->
             <article class="card">
-                <div class="img-placeholder">
-                    <span class="img-placeholder-text">Insertar Imagen</span>
-                    <span style="font-size: 0.8rem;">(Sugerido: 300x200 px)</span>
-                </div>
-                <div class="text-placeholder title"></div>
-                <div class="text-placeholder"></div>
-                <div class="text-placeholder"></div>
-                <div class="text-placeholder short"></div>
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&auto=format&fit=crop" alt="Espacio de Trabajo" class="card-img">
+                <h3>Intervenciones educativas y Hábitos</h3>
+                <p>Entre las estrategias que se proponen para impulsar un mayor rendimiento académico, además de fomentar una adecuada salud mental y el bienestar de los adolescentes que utilizan el entorno digital de manera cotidiana, está la implementación de intervenciones psicoeducativas diseñadas para sensibilizar a los adolescentes sobre los efectos negativos y la promoción de hábitos saludables.</p>
             </article>
 
             <!-- Tarjeta 3 -->
             <article class="card">
-                <div class="img-placeholder">
-                    <span class="img-placeholder-text">Insertar Imagen</span>
-                    <span style="font-size: 0.8rem;">(Sugerido: 300x200 px)</span>
-                </div>
-                <div class="text-placeholder title"></div>
-                <div class="text-placeholder"></div>
-                <div class="text-placeholder"></div>
-                <div class="text-placeholder short"></div>
+                <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500&auto=format&fit=crop" alt="Lectura e Investigación" class="card-img">
+                <h3>   Pensamiento Crítico</h3>
+                <p>Otras estrategias clave incluyen la formación del uso responsable y la alfabetización digital que permita el pensamiento crítico en las mismas, entre otros enfoques, todo con el fin de que los estudiantes tengan una mejor calidad de vida.</p>
+            </article>
+            
+            <article class="card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGorMS3gxfoAlpmOa0UFgwmoRBZBRqqsNreHVKzXLTHA&s=10" alt="Lectura e Investigación" class="card-img">
+                <h3>    propuestas </h3>
+                <p> Capacitar a los alumnos sobre cómo configurar límites de tiempo de pantalla, desactivar notificaciones distractoras durante horas de estudio y utilizar aplicaciones de productividad.</p>
             </article>
 
         </section>
 
     </main>
+    <a href="3.html"> siguiente pagina </a>
 
     <footer>
-        <p>[ Pie de página / Información de contacto ]</p>
+        <p>© Proyecto de español de Diego y oskar </p>
     </footer>
 
 </body>
