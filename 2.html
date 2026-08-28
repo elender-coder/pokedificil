@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plantilla Web</title>
+    <title>Plantilla Web Mejorada</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente ligeramente más moderna */
         }
 
         body {
@@ -33,14 +33,35 @@
             padding: 0 1rem;
         }
 
-        /* Banner Principal */
+        /* Banner Principal (Hero) - Ahora con la imagen de fondo */
         .hero {
-            background-color: #e2e8f0;
-            border: 2px dashed #cbd5e1;
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDEMmLfPnhCRdOxqcMJb6-0NzY0OK-ObVUu_P1DVyZmg&s=10');
+            background-size: cover;
+            background-position: center;
             border-radius: 8px;
-            padding: 3rem;
+            padding: 4rem 2rem; /* Más padding para que se vea la imagen */
             text-align: center;
             margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Sombra para destacar el banner */
+            position: relative;
+        }
+
+        /* Superposición oscura para que el texto sobre la imagen hero sea legible */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.4); /* Capa negra traslúcida */
+            border-radius: 8px;
+        }
+
+        /* Asegurar que el contenido del hero esté sobre la superposición */
+        .hero-content {
+            position: relative;
+            z-index: 1;
         }
 
         /* Rejilla de Contenido */
@@ -58,21 +79,54 @@
             padding: 1.5rem;
             display: flex;
             flex-direction: column;
+            transition: transform 0.2s; /* Efecto suave al pasar el ratón */
         }
 
-        /* Espacio para Imágenes (Placeholders) */
+        .card:hover {
+            transform: translateY(-5px); /* Se levanta un poco al hacer hover */
+        }
+
+        /* Estilo para las imágenes dentro de las tarjetas */
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        /* Espacio para Imágenes MEJORADO (Placeholders en tarjetas) */
         .img-placeholder {
             width: 100%;
             height: 200px;
-            background-color: #cbd5e1;
+            background-color: #e2e8f0; /* Fondo gris claro */
+            border: 2px solid #cbd5e1; /* Borde gris */
             border-radius: 6px;
             display: flex;
+            flex-direction: column; /* Icono arriba, texto abajo */
             align-items: center;
             justify-content: center;
-            color: #64748b;
-            font-weight: bold;
+            color: #94a3b8; /* Color de texto suave */
             margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
         }
+
+        /* Simulación de un icono de imagen dentro del placeholder */
+        .img-placeholder::before {
+            content: '📷'; /* Icono de cámara simple */
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.5;
+        }
+
+        .img-placeholder-text {
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
 
         /* Bloques vacíos para texto */
         .text-placeholder {
@@ -106,46 +160,46 @@
 <body>
 
     <header>
-        <h1>problematicas  </ h1>
+        <h1>[ TÍTULO DE LA PÁGINA ]</h1>
+        <p>[ Subtítulo o descripción breve ]</p>
     </header>
 
     <main class="container">
         
+        <!-- Sección Principal (Hero con imagen de fondo) -->
         <section class="hero">
-            <div><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDEMmLfPnhCRdOxqcMJb6-0NzY0OK-ObVUu_P1DVyZmg&s=10">
-                Espacio para Imagen Principal (Banner)
+            <div class="hero-content">
+                <!-- He añadido placeholders de texto aquí también para rellenar el banner -->
+                <div class="text-placeholder title" style="background-color: #f1f5f9; margin: 0 auto 1rem auto; width: 50%;"></div>
+                <div class="text-placeholder" style="background-color: #f1f5f9; width: 80%; margin: 0 auto 0.75rem auto;"></div>
+                <div class="text-placeholder short" style="background-color: #f1f5f9; margin: 0 auto; width: 30%;"></div>
             </div>
-            <div class="text-placeholder title" style="margin: 0 auto 1rem auto;"></div>
-            <div class="text-placeholder"></div>
-            <div class="text-placeholder short" style="margin: 0 auto;"></div>
         </section>
 
+        <!-- Rejilla de Tarjetas -->
         <section class="grid">
             
+            <!-- Tarjeta 1 -->
             <article class="card">
-                <div class="img-placeholder">
-                    Imagen 1 (300x200)
-                </div>
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&auto=format&fit=crop" alt="Tecnología e Informática" class="card-img">
                 <div class="text-placeholder title"></div>
                 <div class="text-placeholder"></div>
                 <div class="text-placeholder"></div>
                 <div class="text-placeholder short"></div>
             </article>
 
+            <!-- Tarjeta 2 -->
             <article class="card">
-                <div class="img src=https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDEMmLfPnhCRdOxqcMJb6-0NzY0OK-ObVUu_P1DVyZmg&s=10">
-                    Imagen 2 (300x200)
-                </div>
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&auto=format&fit=crop" alt="Espacio de Trabajo" class="card-img">
                 <div class="text-placeholder title"></div>
                 <div class="text-placeholder"></div>
                 <div class="text-placeholder"></div>
                 <div class="text-placeholder short"></div>
             </article>
 
+            <!-- Tarjeta 3 -->
             <article class="card">
-                <div class="img-placeholder">
-                    Imagen 3 (300x200)
-                </div>
+                <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500&auto=format&fit=crop" alt="Lectura e Investigación" class="card-img">
                 <div class="text-placeholder title"></div>
                 <div class="text-placeholder"></div>
                 <div class="text-placeholder"></div>
